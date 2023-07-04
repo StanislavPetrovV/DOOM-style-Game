@@ -2,4 +2,4 @@
 
 Control: 'WASD' + mouse
 
-![doom](/sreenshots/0.gif)
+![doom](/sreenshots/0.jpg)
