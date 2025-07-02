@@ -3,14 +3,49 @@ from random import randint, random
 
 
 class NPC(AnimatedSprite):
+    """
+    Represents a non-player character (NPC) in the game with animated behaviors. 
+    This class handles the NPC's movement, attacks, animations, and interactions with the player.
+
+    The NPC can perform various actions such as moving towards the player, attacking, 
+    and reacting to being hit. It manages its health and animations based on its state 
+    (alive, in pain, or dead) and interacts with the game environment through ray casting.
+
+    Args:
+        game: The game instance that the NPC belongs to.
+        path: The file path to the NPC's sprite image.
+        pos: The initial position of the NPC in the game world.
+        scale: The scale factor for the NPC's sprite.
+        shift: The vertical shift for the NPC's sprite.
+        animation_time: The duration for animations.
+
+    Attributes:
+        attack_images: List of images used for the NPC's attack animation.
+        death_images: List of images used for the NPC's death animation.
+        idle_images: List of images used for the NPC's idle animation.
+        pain_images: List of images used for the NPC's pain animation.
+        walk_images: List of images used for the NPC's walking animation.
+        attack_dist: The distance within which the NPC can attack the player.
+        speed: The movement speed of the NPC.
+        size: The size of the NPC for collision detection.
+        health: The current health of the NPC.
+        attack_damage: The damage dealt by the NPC when it attacks.
+        accuracy: The probability of the NPC successfully hitting the player.
+        alive: A boolean indicating if the NPC is alive.
+        pain: A boolean indicating if the NPC is in pain.
+        ray_cast_value: A boolean indicating if the NPC can see the player.
+        frame_counter: A counter for animation frames.
+        player_search_trigger: A boolean indicating if the NPC is searching for the player.
+    """
+
     def __init__(self, game, path='resources/sprites/npc/soldier/0.png', pos=(10.5, 5.5),
                  scale=0.6, shift=0.38, animation_time=180):
         super().__init__(game, path, pos, scale, shift, animation_time)
-        self.attack_images = self.get_images(self.path + '/attack')
-        self.death_images = self.get_images(self.path + '/death')
-        self.idle_images = self.get_images(self.path + '/idle')
-        self.pain_images = self.get_images(self.path + '/pain')
-        self.walk_images = self.get_images(self.path + '/walk')
+        self.attack_images = self.get_images(f'{self.path}/attack')
+        self.death_images = self.get_images(f'{self.path}/death')
+        self.idle_images = self.get_images(f'{self.path}/idle')
+        self.pain_images = self.get_images(f'{self.path}/pain')
+        self.walk_images = self.get_images(f'{self.path}/walk')
 
         self.attack_dist = randint(3, 6)
         self.speed = 0.03
@@ -57,11 +92,10 @@ class NPC(AnimatedSprite):
                 self.game.player.get_damage(self.attack_damage)
 
     def animate_death(self):
-        if not self.alive:
-            if self.game.global_trigger and self.frame_counter < len(self.death_images) - 1:
-                self.death_images.rotate(-1)
-                self.image = self.death_images[0]
-                self.frame_counter += 1
+        if not self.alive and (self.game.global_trigger and self.frame_counter < len(self.death_images) - 1):
+            self.death_images.rotate(-1)
+            self.image = self.death_images[0]
+            self.frame_counter += 1
 
     def animate_pain(self):
         self.animate(self.pain_images)
@@ -69,13 +103,12 @@ class NPC(AnimatedSprite):
             self.pain = False
 
     def check_hit_in_npc(self):
-        if self.ray_cast_value and self.game.player.shot:
-            if HALF_WIDTH - self.sprite_half_width < self.screen_x < HALF_WIDTH + self.sprite_half_width:
-                self.game.sound.npc_pain.play()
-                self.game.player.shot = False
-                self.pain = True
-                self.health -= self.game.weapon.damage
-                self.check_health()
+        if self.ray_cast_value and self.game.player.shot and HALF_WIDTH - self.sprite_half_width < self.screen_x < HALF_WIDTH + self.sprite_half_width:
+            self.game.sound.npc_pain.play()
+            self.game.player.shot = False
+            self.pain = True
+            self.health -= self.game.weapon.damage
+            self.check_health()
 
     def check_health(self):
         if self.health < 1:
@@ -137,7 +170,7 @@ class NPC(AnimatedSprite):
         delta_depth = dy / sin_a
         dx = delta_depth * cos_a
 
-        for i in range(MAX_DEPTH):
+        for _ in range(MAX_DEPTH):
             tile_hor = int(x_hor), int(y_hor)
             if tile_hor == self.map_pos:
                 player_dist_h = depth_hor
@@ -158,7 +191,7 @@ class NPC(AnimatedSprite):
         delta_depth = dx / cos_a
         dy = delta_depth * sin_a
 
-        for i in range(MAX_DEPTH):
+        for _ in range(MAX_DEPTH):
             tile_vert = int(x_vert), int(y_vert)
             if tile_vert == self.map_pos:
                 player_dist_v = depth_vert
@@ -173,9 +206,7 @@ class NPC(AnimatedSprite):
         player_dist = max(player_dist_v, player_dist_h)
         wall_dist = max(wall_dist_v, wall_dist_h)
 
-        if 0 < player_dist < wall_dist or not wall_dist:
-            return True
-        return False
+        return 0 < player_dist < wall_dist or not wall_dist
 
     def draw_ray_cast(self):
         pg.draw.circle(self.game.screen, 'red', (100 * self.x, 100 * self.y), 15)
@@ -183,31 +214,6 @@ class NPC(AnimatedSprite):
             pg.draw.line(self.game.screen, 'orange', (100 * self.game.player.x, 100 * self.game.player.y),
                          (100 * self.x, 100 * self.y), 2)
 
-
-class SoldierNPC(NPC):
-    def __init__(self, game, path='resources/sprites/npc/soldier/0.png', pos=(10.5, 5.5),
-                 scale=0.6, shift=0.38, animation_time=180):
-        super().__init__(game, path, pos, scale, shift, animation_time)
-
-class CacoDemonNPC(NPC):
-    def __init__(self, game, path='resources/sprites/npc/caco_demon/0.png', pos=(10.5, 6.5),
-                 scale=0.7, shift=0.27, animation_time=250):
-        super().__init__(game, path, pos, scale, shift, animation_time)
-        self.attack_dist = 1.0
-        self.health = 150
-        self.attack_damage = 25
-        self.speed = 0.05
-        self.accuracy = 0.35
-
-class CyberDemonNPC(NPC):
-    def __init__(self, game, path='resources/sprites/npc/cyber_demon/0.png', pos=(11.5, 6.0),
-                 scale=1.0, shift=0.04, animation_time=210):
-        super().__init__(game, path, pos, scale, shift, animation_time)
-        self.attack_dist = 6
-        self.health = 350
-        self.attack_damage = 15
-        self.speed = 0.055
-        self.accuracy = 0.25
 
 
 

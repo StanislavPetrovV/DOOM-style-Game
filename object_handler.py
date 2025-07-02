@@ -1,5 +1,5 @@
 from sprite_object import *
-from npc import *
+from enemy import *
 from random import choices, randrange
 
 
@@ -32,15 +32,69 @@ class ObjectHandler:
         add_sprite(AnimatedSprite(game, pos=(7.5, 5.5)))
         add_sprite(AnimatedSprite(game, pos=(14.5, 1.5)))
         add_sprite(AnimatedSprite(game, pos=(14.5, 4.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 5.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 7.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(12.5, 7.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(9.5, 7.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 12.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(9.5, 20.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(10.5, 20.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(3.5, 14.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(3.5, 18.5)))
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(14.5, 5.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(14.5, 7.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(12.5, 7.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(9.5, 7.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(14.5, 12.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(9.5, 20.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(10.5, 20.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(3.5, 14.5),
+            )
+        )
+        add_sprite(
+            AnimatedSprite(
+                game,
+                path=f'{self.anim_sprite_path}red_light/0.png',
+                pos=(3.5, 18.5),
+            )
+        )
         add_sprite(AnimatedSprite(game, pos=(14.5, 24.5)))
         add_sprite(AnimatedSprite(game, pos=(14.5, 30.5)))
         add_sprite(AnimatedSprite(game, pos=(1.5, 30.5)))
@@ -57,12 +111,14 @@ class ObjectHandler:
         # add_npc(CyberDemonNPC(game, pos=(14.5, 25.5)))
 
     def spawn_npc(self):
-        for i in range(self.enemies):
-                npc = choices(self.npc_types, self.weights)[0]
+        for _ in range(self.enemies):
+            npc = choices(self.npc_types, self.weights)[0]
+            pos = x, y = randrange(self.game.map.cols), randrange(self.game.map.rows)
+            while (pos in self.game.map.world_map) or (pos in self.restricted_area):
                 pos = x, y = randrange(self.game.map.cols), randrange(self.game.map.rows)
-                while (pos in self.game.map.world_map) or (pos in self.restricted_area):
-                    pos = x, y = randrange(self.game.map.cols), randrange(self.game.map.rows)
-                self.add_npc(npc(self.game, pos=(x + 0.5, y + 0.5)))
+            self.add_npc(npc(self.game, pos=(x + 0.5, y + 0.5)))
+        
+        
 
     def check_win(self):
         if not len(self.npc_positions):
@@ -70,11 +126,20 @@ class ObjectHandler:
             pg.display.flip()
             pg.time.delay(1500)
             self.game.new_game()
+        
 
     def update(self):
         self.npc_positions = {npc.map_pos for npc in self.npc_list if npc.alive}
         [sprite.update() for sprite in self.sprite_list]
         [npc.update() for npc in self.npc_list]
+        
+        for enemy in self.npc_positions:
+            enemy_x = int(enemy[0] * self.game.map.tile_size)
+            enemy_y = int(enemy[1] * self.game.map.tile_size)
+            # pg.draw.circle(self.game.screen, (255, 0, 0), (enemy_x, enemy_y), 5)  # Position de l'ennemi
+            self.game.map.draw_circle_object((255, 0, 0), (enemy_x, enemy_y), 5)
+            # print(self.npc_positions)
+            
         self.check_win()
 
     def add_npc(self, npc):

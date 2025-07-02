@@ -3,6 +3,22 @@ from functools import lru_cache
 
 
 class PathFinding:
+    """
+    Provides pathfinding capabilities for navigating the game map. 
+    This class uses breadth-first search (BFS) to find the shortest path between two points on the map.
+
+    The class initializes with a reference to the game and constructs a graph representation of the navigable areas. 
+    It includes methods to retrieve paths, perform BFS, and generate possible next nodes based on the current position.
+
+    Args:
+        game: The game instance that contains the map and other game elements.
+
+    Attributes:
+        map: The mini-map representation of the game world.
+        ways: Possible movement directions for pathfinding.
+        graph: A dictionary representing the graph of navigable nodes.
+    """
+
     def __init__(self, game):
         self.game = game
         self.map = game.map.mini_map

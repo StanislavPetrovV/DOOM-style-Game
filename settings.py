@@ -1,7 +1,13 @@
 import math
+import pygame
 
+pygame.init()
 # game settings
-RES = WIDTH, HEIGHT = 1600, 900
+screen_info = pygame.display.Info()
+
+screen_height = screen_info.current_h
+RES = WIDTH, HEIGHT = screen_info.current_w, screen_info.current_h
+
 # RES = WIDTH, HEIGHT = 1920, 1080
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2

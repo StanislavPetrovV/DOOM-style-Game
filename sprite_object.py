@@ -82,8 +82,8 @@ class AnimatedSprite(SpriteObject):
 
     def get_images(self, path):
         images = deque()
-        for file_name in os.listdir(path):
+        for file_name in sorted(os.listdir(path)):
             if os.path.isfile(os.path.join(path, file_name)):
-                img = pg.image.load(path + '/' + file_name).convert_alpha()
+                img = pg.image.load(f'{path}/{file_name}').convert_alpha()
                 images.append(img)
         return images

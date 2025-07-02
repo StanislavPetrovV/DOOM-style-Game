@@ -40,11 +40,10 @@ class Player:
         self.check_game_over()
 
     def single_fire_event(self, event):
-        if event.type == pg.MOUSEBUTTONDOWN:
-            if event.button == 1 and not self.shot and not self.game.weapon.reloading:
-                self.game.sound.shotgun.play()
-                self.shot = True
-                self.game.weapon.reloading = True
+        if event.type == pg.MOUSEBUTTONDOWN and (event.button == 1 and not self.shot and not self.game.weapon.reloading):
+            self.game.sound.shotgun.play()
+            self.shot = True
+            self.game.weapon.reloading = True
 
     def movement(self):
         sin_a = math.sin(self.angle)
@@ -56,7 +55,7 @@ class Player:
 
         keys = pg.key.get_pressed()
         num_key_pressed = -1
-        if keys[pg.K_w]:
+        if keys[pg.K_z]:
             num_key_pressed += 1
             dx += speed_cos
             dy += speed_sin
@@ -64,7 +63,7 @@ class Player:
             num_key_pressed += 1
             dx += -speed_cos
             dy += -speed_sin
-        if keys[pg.K_a]:
+        if keys[pg.K_q]:
             num_key_pressed += 1
             dx += speed_sin
             dy += -speed_cos
@@ -97,6 +96,8 @@ class Player:
             self.y += dy
 
     def draw(self):
+        """That function draw a point with yellow line representing the user position on the map
+        """
         pg.draw.line(self.game.screen, 'yellow', (self.x * 100, self.y * 100),
                     (self.x * 100 + WIDTH * math.cos(self.angle),
                      self.y * 100 + WIDTH * math. sin(self.angle)), 2)
