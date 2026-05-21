@@ -1,1 +1,1 @@
-pygame
+pygame-ce
